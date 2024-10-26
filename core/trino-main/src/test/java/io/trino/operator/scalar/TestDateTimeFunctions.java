@@ -284,6 +284,26 @@ public class TestDateTimeFunctions
         assertTrinoExceptionThrownBy(assertions.function("from_iso8601_timestamp", "'115023-03-21T10:45:30.00Z'")::evaluate)
                 .hasErrorCode(INVALID_FUNCTION_ARGUMENT)
                 .hasMessage("Millis overflow: 3567614928330000");
+  
+    assertThat(assertions.function("from_iso8601_timestamp", "'20010822T030405.321-1100'"))
+            .matches("TIMESTAMP '2001-08-22 03:04:05.321 -11:00'");
+
+    assertThat(assertions.function("from_iso8601_timestamp", "'20010822T030405.321+0709'"))
+            .matches("TIMESTAMP '2001-08-22 03:04:05.321 +07:09'");
+
+    assertThat(assertions.function("from_iso8601_timestamp", "'20010822T030405-1100'"))
+            .matches("TIMESTAMP '2001-08-22 03:04:05 -11:00'");
+
+    assertThat(assertions.function("from_iso8601_timestamp", "'20010822T030405+0709'"))
+            .matches("TIMESTAMP '2001-08-22 03:04:05 +07:09'");
+
+    assertTrinoExceptionThrownBy(assertions.function("from_iso8601_timestamp", "'20010822T0304'")::evaluate)
+            .hasErrorCode(INVALID_FUNCTION_ARGUMENT)
+            .hasMessage("Invalid format: \"20010822T0304\" is malformed at \"04\"");
+
+    assertTrinoExceptionThrownBy(assertions.function("from_iso8601_timestamp", "'20010822T030405.abc-1100'")::evaluate)
+            .hasErrorCode(INVALID_FUNCTION_ARGUMENT)
+            .hasMessageContaining("Invalid format");
     }
 
     @Test
